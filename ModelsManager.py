@@ -1,5 +1,3 @@
-
-from bs4 import BeautifulSoup
 import re
 import time, datetime
 import os, signal
@@ -11,9 +9,10 @@ import connection
 class ModelsManager:
 
 	def __init__(self):
-#		self._client = client
-#		self._followed = []		# contains a list of model id's (followed on chaturbate)
-#		self._online = []		# contains a list of online model id's (followed on chaturbate)
+		self._tStart = 0.00
+		self._tSpan = 0.00
+		self._tFinish = 0.00
+		self._tUpdate = True
 		self._wanted = []		# contains a list of model id's (from the wanted file)
 #		self._recording = []	# contains a list of model id's who are wanted and online
 		self._models = []		# contains a list of Model objects (only those from the wanted file)
@@ -44,7 +43,11 @@ class ModelsManager:
 					logging.debug('[ModelsManager.update_wanted] Removing ' + old_wanted)
 					self._wanted.remove(old_wanted)
 					model = self.get_model(old_wanted)
-					logging.info('M-\t' + model.get_id() + '\tremoved from wanted file, so removing model')
+					model_string = model.get_id()
+					id_length = len(model_string)
+					for x in range(id_length, MAX_LEN):
+						model_string = ' ' + model_string
+					logging.debug(MODEL_DEL + ' ' + model_string + '  removed from wanted file, so removing model')
 					model.destroy()
 					self._models.remove(model)
 			for new_wanted in new_wanted_list:
@@ -53,7 +56,11 @@ class ModelsManager:
 					logging.debug('[ModelsManager.update_wanted] Adding ' + new_wanted)
 					self._wanted.append(new_wanted)
 					model = Model(new_wanted)
-					logging.info('M+\t' + new_wanted + '\tfound in wanted file, so adding model')
+					model_string = new_wanted
+					id_length = len(model_string)
+					for x in range(id_length, MAX_LEN):
+						model_string = ' ' + model_string
+					logging.debug(MODEL_ADD + ' ' + model_string + '  found in wanted file, so adding model')
 					model.init()
 					self._models.append(model)
 		except IOError, e:
@@ -67,13 +74,35 @@ class ModelsManager:
 		for model in self._models:
 			model.set_client(client)
 			model.update()
+	
+	def get_some(self):
+		self._tStart = time.time()
+		self._tSpan = self._tSpan * 60.0 * 60.0
+		self._tFinish = self._tStart + self._tSpan
+		self._tUpdate = False
+		st = datetime.datetime.fromtimestamp(self._tFinish).strftime('%m-%d-%Y  %l:%M:%S %p')
+		logging.info('   Timespan:    ' + str(self._tSpan / 60 / 60) + ' Hours.')
+		logging.info('   Finish Time: ' + st + '.')
+		logging.info('***********************************************************************************')
+		logging.info('')
 		
 	def update(self):
 		self.update_wanted()
 		self.update_models()
+		self._tUpdate = time.time() > self._tFinish
 #		if DEBUGGING:
 #			self.output_debug()
-		
+	
+	def stopProcess(self):
+	#	try:
+		for old_wanted in self._wanted:
+			model = self.get_model(old_wanted)
+			model.destroy()
+		return True
+	#	except Exception, e:
+	#		logging.info(' had some exception: ' + e)
+	#		return False
+			
 	def output_debug(self):
 		data = "[ModelsManager.output_debug] wanted:"
 		for model_id in self._wanted:
@@ -90,4 +119,3 @@ class ModelsManager:
 			if model.is_recording():
 				data = data + " " + model.get_id()
 		logging.debug(data)
-	

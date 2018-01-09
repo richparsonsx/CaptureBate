@@ -46,7 +46,7 @@ def init_logging():
 	logger = logging.getLogger()
 	logger.addHandler(logHandler)
 	logger.setLevel(Logging_level)
-	logging.info('*** Starting application: version %s ***' %VERSION)
+#	logging.info('******************* Starting application: version %s *******************' %VERSION)
 	
 def Remove_folder(folder):
     if (os.path.exists(folder) == True):
@@ -105,16 +105,19 @@ URL_FOLLOWED = Config_file('url', 'URL_FOLLOWED')
 URL_SPY_SHOWS = Config_file('url', 'URL_SPY_SHOWS')
 USER = Credentials_file('credentials','USER')
 PASS = Credentials_file('credentials','PASS')
+ROOT_FOLDER = Config_file('folders', 'ROOT_FOLDER')
 OUTPUT_FOLDER = Config_file('folders', 'OUTPUT_FOLDER')
-VIDEO_FOLDER = OUTPUT_FOLDER + Config_file('folders','VIDEO_FOLDER')
-TEMP_FOLDER = VIDEO_FOLDER + '/temp'
-SCRIPTS_FOLDER = OUTPUT_FOLDER + Config_file('folders','SCRIPTS_FOLDER')
-DEBUG_FOLDER = OUTPUT_FOLDER + Config_file('folders','DEBUG_FOLDER')
-LOG_FILE = OUTPUT_FOLDER + Config_file('files','LOG_FILE')
-WANTED_FILE = OUTPUT_FOLDER + Config_file('files','WANTED_FILE')
+VIDEO_FOLDER = ROOT_FOLDER + Config_file('folders','VIDEO_FOLDER')
+TEMP_FOLDER = VIDEO_FOLDER
+SCRIPTS_FOLDER = ROOT_FOLDER + Config_file('folders','SCRIPTS_FOLDER')
+DEBUG_FOLDER = ROOT_FOLDER + Config_file('folders','DEBUG_FOLDER')
+LOG_FILE = ROOT_FOLDER + Config_file('files','LOG_FILE')
+WANTED_FILE = ROOT_FOLDER + Config_file('files','WANTED_FILE')
 DELAY = int(Config_file('delays','DELAY'))
 VERSION = Config_file('version','VERSION')
 RTMPDUMP = Config_file('advanced','RTMPDUMP')
+MAX_LEN = int(Config_file('advanced','MAX_LENGTH'))
+RELOAD_TIME = int(Config_file('advanced','RELOAD_TIME'))
 # Enable storing html to debug.log file + set logging level
 DEBUGGING = ast.literal_eval(Config_file('debug','DEBUGGING'))
 MINIMAL_RECORDING_SIZE_IN_MB = int(float(Config_file('advanced','MINIMAL_RECORDING_SIZE_IN_MB')))
